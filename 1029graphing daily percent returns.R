@@ -1,4 +1,5 @@
 ### graping daily percent returns
+### 10/29 lecture
 
 
 install.packages("quantmod")
