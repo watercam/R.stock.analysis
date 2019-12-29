@@ -1,7 +1,6 @@
-####################################
-### graphing multiple securities ###
-### 10/31 lecture ##################
-####################################
+### graphing multiple securities
+### 10/31 lecture
+
 
 install.packages("quantmod")
 install.packages("xts")
