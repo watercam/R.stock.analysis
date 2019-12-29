@@ -1,7 +1,6 @@
-####################################
-### calculating industry returns ###
-### 11/07 lecture ##################
-####################################
+### calculating industry returns
+### 11/07 lecture
+
 
 install.packages("quantmod")
 install.packages("xts")
@@ -13,7 +12,7 @@ jnj <- getSymbols("JNJ", src = "yahoo", auto.assign = FALSE)
 gspc <- getSymbols("^GSPC", src = "yahoo", auto.assign = FALSE)
 pfe <- getSymbols("PFE", src = "yahoo", auto.assign = FALSE)
 
-## create subsets of data
+## subset data
 jnj_subset <- subset(jnj[ , 6], index(jnj) >= "2010-01-01" & 
                        index(jnj) <= "2015-12-31")
 gspc_subset <- subset(gspc[ , 6], index(gspc) >= "2010-01-01" & 
@@ -21,12 +20,11 @@ gspc_subset <- subset(gspc[ , 6], index(gspc) >= "2010-01-01" &
 pfe_subset <- subset(pfe[ , 6], index(pfe) >= "2010-01-01" & 
                        index(pfe) <= "2015-12-31")
 
-## merge data into one database
+## merge data
 all_adjusted <- na.locf(merge(pfe_subset, jnj_subset))
 all_adjusted <- na.locf(merge(all_adjusted, gspc_subset))
 
-## normalize data, convert from xts to dataframe
-#remove na.omit values from dataset
+#remove na values from dataset
 all_adjusted_nona <- na.omit(all_adjusted)
 #convert dates into vector
 date <- index(all_adjusted_nona)
@@ -41,9 +39,7 @@ all_adjusted_df$GSPC.Norm <- all_adjusted_df$GSPC.Adjusted /
 all_adjusted_df$PFE.Norm <- all_adjusted_df$PFE.Adjusted / 
   all_adjusted_df$PFE.Adjusted[1]
 
-## replace all above code with load(all_adjusted_df)
-
-## acquire peer group data; subset to period of interest; merge
+## acquire peer group data; subset & merge
 pfe <- getSymbols( "PFE", src = "yahoo", auto.assign = FALSE)
 nvs <- getSymbols( "NVS", src = "yahoo", auto.assign = FALSE)
 mrk <- getSymbols( "MRK", src = "yahoo", auto.assign = FALSE)
@@ -56,7 +52,7 @@ mrk_subset <- subset(mrk[ , 6], index(mrk) >= "2010-01-01" &
 peer <- merge(pfe_subset, nvs_subset)
 peer <- merge(peer, mrk_subset)
 
-## calculate returns
+## calculate % returns
 peer$pfe.ret <- Delt(peer$PFE.Adjusted) * 100
 peer$nvs.ret <- Delt(peer$NVS.Adjusted) * 100
 peer$mrk.ret <- Delt(peer$MRK.Adjusted) * 100
@@ -95,7 +91,7 @@ date <- index(peer_vw)
 peer_vw_df <- cbind(data.frame(date), data.frame(peer_vw))
 rownames(peer_vw_df) <- seq(1:nrow(peer_vw_df))
 
-## write a for() loop with nested if(), else if(), else() statements
+## write a for loop with SHROUT data from internet
 for(i in 1:nrow(peer_vw_df)) {
   if(peer_vw_df$date[i] <= as.Date("2010-02-18")) {
     peer_vw_df$pfe.shrout[i] <- 8070372772
@@ -147,7 +143,7 @@ for(i in 1:nrow(peer_vw_df)) {
     peer_vw_df$mrk.shrout[i] <- 2775258591
   }}    
 
-## create market cap variables for each firm (shrout * close)
+## create market cap variables for each firm
 peer_vw_df$pfe.mktcap <- peer_vw_df$PFE.Close * peer_vw_df$pfe.shrout
 peer_vw_df$nvs.mktcap <- peer_vw_df$NVS.Close * peer_vw_df$nvs.shrout
 peer_vw_df$mrk.mktcap <- peer_vw_df$MRK.Close * peer_vw_df$mrk.shrout
@@ -160,7 +156,7 @@ peer_vw_df$w.pfe <- peer_vw_df$pfe.mktcap / peer_vw_df$tot.mktcap
 peer_vw_df$w.nvs <- peer_vw_df$nvs.mktcap / peer_vw_df$tot.mktcap
 peer_vw_df$w.mrk <- peer_vw_df$mrk.mktcap / peer_vw_df$tot.mktcap
 
-## calculate return with Delt() * 100 to convert to percent
+## calculate % return
 peer_vw_df$pfe.ret <- Delt(peer_vw_df$PFE.Adjusted) * 100
 peer_vw_df$nvs.ret <- Delt(peer_vw_df$NVS.Adjusted) * 100
 peer_vw_df$mrk.ret <- Delt(peer_vw_df$MRK.Adjusted) * 100
@@ -168,15 +164,14 @@ peer_vw_df$mrk.ret <- Delt(peer_vw_df$MRK.Adjusted) * 100
 ## calculate total index return
 peer_vw_df$vw_ret <- (peer_vw_df$pfe.ret * peer_vw_df$w.pfe) + (peer_vw_df$nvs.ret * peer_vw_df$w.nvs) + (peer_vw_df$mrk.ret * peer_vw_df$w.mrk)
 
-## omit na values; bind vw to ew dataframe
+## omit & bind
 peer_vw_df <- na.omit(peer_vw_df)
 peer_all_df <- cbind(data.frame(peer_ret_df), data.frame(peer_vw_df$vw_ret))
 
-## create pegged chart with all variables pegged to JNJ starting price; subset relavent data
+## create pegged chart with all variables pegged to JNJ starting price
 peg_chart <- peer_all_df[ , c(1, 2, 5, 11, 12)]
 names(peg_chart) <- c("date", "JNJ.Price", "JNJ.Ret", "EW.Ret", "VW.Ret")
 
-##
 for(i in 1:nrow(peg_chart)) {
   if(peg_chart$date[i] == peg_chart$date[1]) {
     peg_chart$JNJ.peg[i] <- peg_chart$JNJ.Price[1]
@@ -188,7 +183,7 @@ for(i in 1:nrow(peg_chart)) {
     peg_chart$VW.peg[i] <- peg_chart$VW.peg[i-1] * (1 + (peg_chart$VW.Ret/100))
   }}
 
-## plot JNJ chart with pegged industry returns
+## plot JNJ with pegged industry returns
 plot ( x= peg_chart$date, xab = "Date",
        y = peg_chart$JNJ.peg, ylab = "Value of Investment ($)", type = "l",
        ylim = c(35,130), lwd = 2, lty = 2, col = "blueviolet",
