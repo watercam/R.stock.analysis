@@ -13,7 +13,7 @@ jnj <- getSymbols("JNJ", src = "yahoo", auto.assign = FALSE)
 gspc <- getSymbols("^GSPC", src = "yahoo", auto.assign = FALSE)
 pfe <- getSymbols("PFE", src = "yahoo", auto.assign = FALSE)
 
-## create subsets of data
+## subset data
 jnj_subset <- subset(jnj[ , 6], index(jnj) >= "2010-01-01" & 
                        index(jnj) <= "2015-12-31")
 gspc_subset <- subset(gspc[ , 6], index(gspc) >= "2010-01-01" & 
@@ -21,7 +21,7 @@ gspc_subset <- subset(gspc[ , 6], index(gspc) >= "2010-01-01" &
 pfe_subset <- subset(pfe[ , 6], index(pfe) >= "2010-01-01" & 
                        index(pfe) <= "2015-12-31")
 
-## merge data into one database
+## merge data
 all_adjusted <- na.locf(merge(pfe_subset, jnj_subset))
 all_adjusted <- na.locf(merge(all_adjusted, gspc_subset))
 
@@ -41,10 +41,8 @@ plot( x = index(all_adjusted), xlab = "Date",
 Daily Adjusted Close Price
 January 1, 2010 - December 31, 2015")
 
-## add space around margins
+## add margin space - continue plot
 par(mar = c(5, 5, 5, 5))
-
-## continue graph on same plot
 par(new = TRUE)
 
 ## graph jnj and pfe
@@ -54,7 +52,7 @@ plot( x = index(all_adjusted), xlab = "", xaxt = "n",
 lines( x = index(all_adjusted), y = all_adjusted$PFE.Adjusted,
        lwd = 2, col = "forestgreen", lty = 2)
 
-## manually label right y axis
+## label right y axis
 axis(4)
 mtext("Adjusted Close Price ($)", side = 4, line = 3)
 
