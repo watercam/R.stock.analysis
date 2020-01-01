@@ -19,13 +19,13 @@ usd.eur <- na.omit(usd.eur)
 ## calculate daily % change
 usd.eur$eur.change <- Delt(usd.eur$DEXUSEU) * 100
 
-#convert to dataframe and attach to regression_dataset; limit to variables of interest
+## limit to variables of interest
 date <- index(usd.eur)
 usd.eur.df <- cbind(data.frame(date), data.frame(usd.eur))
 regression_data_all <- merge(regression_dataset, usd.eur.df)
 regression_data_vars <- regression_data_all[ , c(1,5,6,11,12,14)]
 
-## create dataset that subsets down to estimation and event window
+## subset down to estimation and event window
 event_study <- subset(regression_data_vars, regression_data_vars$date >=
                       "2014-01-19" & regression_data_vars$date <= "2015-01-20")
 
@@ -56,7 +56,7 @@ event_study$JNJ.Ret.Pred.3F <- summary(threefactor_model)$coefficients[1] +
 event_study$JNJ.Ab.M <- event_study$JNJ.Ret - event_study$JNJ.Ret.Pred.M
 event_study$JNJ.Ab.3F <- event_study$JNJ.Ret - event_study$JNJ.Ret.Pred.3F
 
-## add t stat to event_study; tells the stat significance of the abnormal return
+## add t stat to event_study
 event_study$tstat.M <- event_study$JNJ.Ab.M / summary(market_model)$sigma
 event_study$tstat.3F <- event_study$JNJ.Ab.3F / summary(threefactor_model)$sigma
 
