@@ -1,5 +1,6 @@
 #####################################
 ###### graphing a pegged chart ######
+###### 11/05 lecture ################
 #####################################
 
 install.packages("quantmod")
@@ -7,12 +8,12 @@ install.packages("xts")
 library(quantmod)
 library(xts)
 
-## get data from yahoo
+## data from yahoo
 jnj <- getSymbols("JNJ", src = "yahoo", auto.assign = FALSE)
 gspc <- getSymbols("^GSPC", src = "yahoo", auto.assign = FALSE)
 pfe <- getSymbols("PFE", src = "yahoo", auto.assign = FALSE)
 
-## create subsets of data
+## subset data
 jnj_subset <- subset(jnj[ , 6], index(jnj) >= "2010-01-01" & 
                        index(jnj) <= "2015-12-31")
 gspc_subset <- subset(gspc[ , 6], index(gspc) >= "2010-01-01" & 
@@ -20,11 +21,10 @@ gspc_subset <- subset(gspc[ , 6], index(gspc) >= "2010-01-01" &
 pfe_subset <- subset(pfe[ , 6], index(pfe) >= "2010-01-01" & 
                        index(pfe) <= "2015-12-31")
 
-## merge data into one database
+## merge data
 all_adjusted <- na.locf(merge(pfe_subset, jnj_subset))
 all_adjusted <- na.locf(merge(all_adjusted, gspc_subset))
 
-## normalize data, convert from xts to dataframe
 #remove na.omit values from dataset
 all_adjusted_nona <- na.omit(all_adjusted)
 #convert dates into vector
@@ -49,7 +49,7 @@ plot( x = date, xlab = "Date",
 Normalized Return from Adjusted Close
 January 1, 2010 - December 31, 2015")
 
-## add gspc and pfe lines
+## add gspc and pfe
 lines( x = date, y = all_adjusted_df$GSPC.Norm, lwd = 2, lty = 2,
        col = "forestgreen")
 lines( x = date, y = all_adjusted_df$PFE.Norm, lwd = 2, lty = 3,
